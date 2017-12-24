@@ -1,0 +1,54 @@
+---
+title: "Assignment 7"
+author: 'Team NYCA: Yang Yu/Arti Gamara'
+date: "12/23/2017"
+output: html_document
+---
+
+#Populate the missing values in the Area variable with an appropriate values (Birmingham, Coventry, Dudley, Sandwell, Solihull, Walsall or Wolverhampton)
+```{r}
+library(readr)
+dirty_data <- read_csv("~/Desktop/Principles of Analytics II/Assignment 7/dirty_data.csv")
+library(tidyr)
+clean_data<-fill(dirty_data, Area, .direction = c("down"))
+head(clean_data)
+```
+#Remove special characters, padding (the white space before and after the text) from Street 1 and Street 2 variables. Make sure the first letters of street names are capitalized and the street denominations are following the same standard (for example, all streets are indicated as “str.”, avenues as “ave.”, etc.
+```{r}
+clean_data$Street = gsub("[^A-Za-z ]"," ",clean_data$Street)
+clean_data$Street = gsub("(?<=[\\s])\\s*|^\\s+|\\s+$","", clean_data$Street, perl=TRUE)
+clean_data$Street = gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", clean_data$Street, perl=TRUE)
+
+library('gsubfn')
+patterns<-c("Lane", "Road", "Avenue", "Green", "Hospital", "Village", "Center", "Drive", "Circle", "Park","Street")
+replacements<-c("Lan.",  "Rd.", "Ave.", "Gr.","Hosp.","Vil.","Ctr.", "Dr.", "Cr.","Pk.","Str.")
+clean_data$Street = gsubfn("\\b\\w+\\b", as.list(setNames(replacements, patterns)), clean_data$Street)
+
+clean_data$`Street 2` = gsub("[^A-Za-z ]"," ",clean_data$`Street 2`)
+clean_data$`Street 2` = gsub("(?<=[\\s])\\s*|^\\s+|\\s+$","", clean_data$`Street 2`, perl=TRUE)
+clean_data$`Street 2` = gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", clean_data$`Street 2`, perl=TRUE)
+clean_data$`Street 2` = gsubfn("\\b\\w+\\b", as.list(setNames(replacements, patterns)), clean_data$`Street 2`)
+head(clean_data)
+```
+#If the value in Street 2 duplicates the value in Street 1, remove the value in Street 2
+```{r}
+i = 1
+while(i <= nrow(clean_data)) 
+{
+  if(clean_data$Street[i] == clean_data$`Street 2` [i]) 
+  {
+    clean_data$`Street 2` [i] = ""
+  }
+  i = i+1
+}
+head(clean_data)
+```
+##Remove the “Strange HTML column”
+```{r}
+clean_data = subset(clean_data[,1:4])
+head(clean_data)
+```
+
+
+
+
